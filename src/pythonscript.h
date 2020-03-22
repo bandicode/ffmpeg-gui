@@ -11,6 +11,33 @@
 
 class Job;
 
+class PythonExpression
+{
+public:
+  PythonExpression(): m_str("None") { }
+  PythonExpression(const PythonExpression&) = default;
+  PythonExpression(PythonExpression&&) noexcept = default;
+  ~PythonExpression() = default;
+
+  const std::string& str() const;
+
+  static PythonExpression str(std::string str, char quote = '"');
+  static PythonExpression fromString(std::string str);
+
+  PythonExpression& operator=(const PythonExpression&) = default;
+  PythonExpression& operator=(PythonExpression&&) noexcept = default;
+
+protected:
+  PythonExpression(std::string str)
+    : m_str(std::move(str))
+  {
+
+  }
+
+private:
+  std::string m_str;
+};
+
 class PythonScript
 {
 public:
@@ -35,30 +62,31 @@ public:
   void importOsPath();
   void def(const std::string& func);
   void enddef();
-  void osRemove(const std::string& expr);
-  void If(const std::string& expr);
+  void osRemove(const PythonExpression& expr);
+  void If(const PythonExpression& expr);
   void EndIf();
-  void While(const std::string& expr);
+  void While(const PythonExpression& expr);
   void EndWhile();
   void Call(const std::string& func);
-  void Call(const std::string& func, const std::vector<std::string>& args);
+  void Call(const std::string& func, const std::vector<PythonExpression>& args);
   void callIfMain(const std::string& func);
 
   template<typename...T>
-  void Call(const std::string& func, const std::string& arg1, const T&... rest)
+  void Call(const std::string& func, const PythonExpression& arg1, const T&... rest)
   {
-    Call(func, std::vector<std::string>{ arg1, rest... });
+    Call(func, std::vector<PythonExpression>{ arg1, rest... });
   }
 
   void CallFFmpeg(std::vector<std::string> args);
 
-  static std::string str(const std::string& content, char quote = '"');
+  static PythonExpression str(const std::string& content, char quote = '"');
+  static PythonExpression expr(const std::string& content);
   static void quoteAll(std::vector<std::string>& list, char quote = '"');
-  static std::string Array(const std::vector<std::string>& args);
+  static PythonExpression Array(const std::vector<PythonExpression>& args);
   static std::string fun(const Job& job);
 
-  static std::string Not(const std::string& expr);
-  static std::string osPathExists(const std::string& expr);
+  static PythonExpression Not(const PythonExpression& expr);
+  static PythonExpression osPathExists(const PythonExpression& expr);
   
 private:
   std::ofstream m_fstream;

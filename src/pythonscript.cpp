@@ -9,6 +9,24 @@
 #include <array>
 #include <cassert>
 
+const std::string& PythonExpression::str() const
+{
+  return m_str;
+}
+
+PythonExpression PythonExpression::str(std::string str, char quote)
+{
+  str.insert(str.begin(), quote);
+  str.push_back(quote);
+
+  return PythonExpression{ std::move(str) };
+}
+
+PythonExpression PythonExpression::fromString(std::string str)
+{
+  return PythonExpression{ std::move(str) };
+}
+
 PythonScript::PythonScript(const std::string& file_path)
   : m_fstream(file_path)
 {
@@ -81,14 +99,14 @@ void PythonScript::enddef()
   m_stack.pop_back();
 }
 
-void PythonScript::osRemove(const std::string& expr)
+void PythonScript::osRemove(const PythonExpression& expr)
 {
-  m_fstream << indent() << "os.remove(" + expr + ")" << "\n";
+  m_fstream << indent() << "os.remove(" + expr.str() + ")" << "\n";
 }
 
-void PythonScript::If(const std::string& expr)
+void PythonScript::If(const PythonExpression& expr)
 {
-  m_fstream << indent() << "if " << expr << ":" << "\n";
+  m_fstream << indent() << "if " << expr.str() << ":" << "\n";
   m_stack.push_back(IF);
 }
 
@@ -98,9 +116,9 @@ void PythonScript::EndIf()
   m_stack.pop_back();
 }
 
-void PythonScript::While(const std::string& expr)
+void PythonScript::While(const PythonExpression& expr)
 {
-  m_fstream << indent() << "while " << expr << ":" << "\n";
+  m_fstream << indent() << "while " << expr.str() << ":" << "\n";
   m_stack.push_back(WHILE);
 }
 
@@ -112,7 +130,7 @@ void PythonScript::EndWhile()
 
 void PythonScript::callIfMain(const std::string& func)
 {
-  If("__name__ == \"__main__\"");
+  If(PythonExpression::fromString("__name__ == \"__main__\""));
   Call(func);
   EndIf();
 }
@@ -122,7 +140,7 @@ void PythonScript::Call(const std::string& func)
   m_fstream << indent() << func << "()" << "\n";
 }
 
-void PythonScript::Call(const std::string& func, const std::vector<std::string>& args)
+void PythonScript::Call(const std::string& func, const std::vector<PythonExpression>& args)
 {
   if (args.empty())
   {
@@ -134,22 +152,35 @@ void PythonScript::Call(const std::string& func, const std::vector<std::string>&
 
   for (size_t i(0); i < args.size() - 1; ++i)
   {
-    m_fstream << args.at(i) << ", ";
+    m_fstream << args.at(i).str() << ", ";
   }
 
-  m_fstream << args.back() << ")" << "\n";
+  m_fstream << args.back().str() << ")" << "\n";
 }
 
 void PythonScript::CallFFmpeg(std::vector<std::string> args)
 {
   quoteAll(args);
   args.insert(args.begin(), "\"ffmpeg\"");
-  Call("subprocess.call", Array(args));
+
+  std::vector<PythonExpression> py_args;
+  for (std::string& str : args)
+  {
+    py_args.push_back(PythonExpression::fromString(std::move(str)));
+  }
+
+
+  Call("subprocess.call", Array(py_args));
 }
 
-std::string PythonScript::str(const std::string& content, char quote)
+PythonExpression PythonScript::str(const std::string& content, char quote)
 {
-  return quote + content + quote;
+  return PythonExpression::fromString(quote + content + quote);
+}
+
+PythonExpression PythonScript::expr(const std::string& content)
+{
+  return PythonExpression::fromString(content);
 }
 
 void PythonScript::quoteAll(std::vector<std::string>& list, char quote)
@@ -161,23 +192,23 @@ void PythonScript::quoteAll(std::vector<std::string>& list, char quote)
   }
 }
 
-std::string PythonScript::Array(const std::vector<std::string>& args)
+PythonExpression PythonScript::Array(const std::vector<PythonExpression>& args)
 {
   if (args.empty())
   {
-    return "[]";
+    return PythonExpression::fromString("[]");
   }
 
   std::string ret = "[";
 
   for (size_t i(0); i < args.size() - 1; ++i)
   {
-    ret += args.at(i) + ", ";
+    ret += args.at(i).str() + ", ";
   }
 
-  ret += args.back() + "]";
+  ret += args.back().str() + "]";
 
-  return ret;
+  return PythonExpression::fromString(ret);
 }
 
 std::string PythonScript::fun(const Job& job)
@@ -185,12 +216,12 @@ std::string PythonScript::fun(const Job& job)
   return "run_job_" + std::to_string(job.num());
 }
 
-std::string PythonScript::Not(const std::string& expr)
+PythonExpression PythonScript::Not(const PythonExpression& expr)
 {
-  return "not " + expr;
+  return PythonExpression::fromString("not " + expr.str());
 }
 
-std::string PythonScript::osPathExists(const std::string& expr)
+PythonExpression PythonScript::osPathExists(const PythonExpression& expr)
 {
-  return "os.path.exists(" + expr + ")";
+  return PythonExpression::fromString("os.path.exists(" + expr.str() + ")");
 }
