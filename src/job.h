@@ -66,6 +66,9 @@ protected:
   void setStatus(std::string mssg);
   void setResult(Result r);
 
+  bool userRemove(const std::string& file_path);
+  void remove(const std::string& file_path);
+
   virtual void update() = 0;
 
   void timerEvent(QTimerEvent* ev) override;

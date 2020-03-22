@@ -82,6 +82,7 @@ void SplitChapter::processNextChapter()
   const std::string end = std::to_string(chap.end());
 
   QFileInfo file{ QString::fromStdString(m_input->name()) };
+  const std::string output_file = (file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix()).toStdString();
 
   std::vector<std::string> args;
   args.push_back("-i"); 
@@ -94,7 +95,9 @@ void SplitChapter::processNextChapter()
   args.push_back(start);
   args.push_back("-to");
   args.push_back(end);
-  args.push_back((file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix()).toStdString());
+  args.push_back(output_file);
+
+  remove(output_file);
 
   m_ffmpeg = std::make_unique<FFMPEG>(args);
 }

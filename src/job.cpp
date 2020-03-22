@@ -6,6 +6,9 @@
 
 #include <QTimerEvent>
 
+#include <QFile>
+#include <QFileInfo>
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -61,6 +64,22 @@ void Job::setResult(Result r)
 {
   m_result = r;
   setState(DONE);
+}
+
+bool Job::userRemove(const std::string& file_path)
+{
+  // TODO: ask user if necessary
+  remove(file_path);
+
+  return !QFileInfo::exists(QString::fromStdString(file_path));
+}
+
+void Job::remove(const std::string& file_path)
+{
+  if (QFileInfo::exists(QString::fromStdString(file_path)))
+  {
+    QFile::remove(QString::fromStdString(file_path));
+  }
 }
 
 void Job::timerEvent(QTimerEvent* ev)

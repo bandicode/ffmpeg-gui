@@ -131,7 +131,6 @@ void FFMPEG::update()
     if (m_input_duration > 0. && Parser::parseProgressTime(text, time))
     {
       m_progress = time / m_input_duration;
-      qDebug() << "progres: " << m_progress;
     }
 
     size_t newline = text.rfind('\n', text.size() - 2);
@@ -151,7 +150,6 @@ void FFMPEG::update()
     if (starts_with_video(text))
     {
       m_output += text;
-      qDebug() << m_output.data();
     }
   }
 }
