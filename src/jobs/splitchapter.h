@@ -33,6 +33,8 @@ public:
   void exportAsPython(const std::string& folder) const override;
 
 protected:
+  std::vector<std::string> computeArgs(size_t chap_index) const;
+
   void processNextChapter();
 
   void update() override;

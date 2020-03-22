@@ -6,6 +6,7 @@
 
 #include "ffmpeg.h"
 #include "media.h"
+#include "pythonscript.h"
 
 #include <QFileInfo>
 #include <QProcess>
@@ -60,7 +61,59 @@ void SplitChapter::cancel()
 
 void SplitChapter::exportAsPython(const std::string& folder) const
 {
+  PythonScript script{ *this, folder };
 
+  script.importOsPath();
+  script.importSubprocess();
+
+  script.newline();
+
+  {
+    script.def(script.fun(*this));
+
+    for (size_t i(0); i < m_input->chapters().size(); ++i)
+    {
+      std::vector<std::string> args = computeArgs(i);
+
+      script.If(script.Not(script.osPathExists(script.str(args.back()))));
+
+      script.CallFFmpeg(args);
+
+      script.EndIf();
+    }
+
+    script.enddef();
+  }
+
+  script.newline();
+
+  script.callIfMain(script.fun(*this));
+}
+
+std::vector<std::string> SplitChapter::computeArgs(size_t chap_index) const
+{
+  const Chapter& chap = m_input->chapters().at(chap_index);
+
+  const std::string start = std::to_string(chap.start());
+  const std::string end = std::to_string(chap.end());
+
+  QFileInfo file{ QString::fromStdString(m_input->name()) };
+  const std::string output_file = (file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix()).toStdString();
+
+  std::vector<std::string> args;
+  args.push_back("-i");
+  args.push_back(m_input->name());
+  args.push_back("-vcodec");
+  args.push_back("copy");
+  args.push_back("-acodec");
+  args.push_back("copy");
+  args.push_back("-ss");
+  args.push_back(start);
+  args.push_back("-to");
+  args.push_back(end);
+  args.push_back(output_file);
+
+  return args;
 }
 
 void SplitChapter::processNextChapter()
@@ -76,28 +129,8 @@ void SplitChapter::processNextChapter()
     return;
   }
 
-  const Chapter& chap = m_input->chapters().at(m_current_chapter);
-
-  const std::string start = std::to_string(chap.start());
-  const std::string end = std::to_string(chap.end());
-
-  QFileInfo file{ QString::fromStdString(m_input->name()) };
-  const std::string output_file = (file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix()).toStdString();
-
-  std::vector<std::string> args;
-  args.push_back("-i"); 
-  args.push_back(m_input->name());
-  args.push_back("-vcodec");
-  args.push_back("copy");
-  args.push_back("-acodec");
-  args.push_back("copy");
-  args.push_back("-ss");
-  args.push_back(start);
-  args.push_back("-to");
-  args.push_back(end);
-  args.push_back(output_file);
-
-  remove(output_file);
+  std::vector<std::string> args = computeArgs(m_current_chapter);
+  remove(args.back());
 
   m_ffmpeg = std::make_unique<FFMPEG>(args);
 }
