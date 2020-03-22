@@ -1,0 +1,50 @@
+// Copyright (C) 2020 Vincent Chambrin
+// This file is part of the 'ffmpeg-gui' project
+// For conditions of distribution and use, see copyright notice in LICENSE
+
+#ifndef FFMPEG_GUI_JOBS_SPLITCHAPTER_H
+#define FFMPEG_GUI_JOBS_SPLITCHAPTER_H
+
+#include "job.h"
+
+class QProcess;
+
+class Media;
+
+class SplitChapter : public Job
+{
+private:
+  std::shared_ptr<Media> m_input;
+
+public:
+
+  SplitChapter(int num, std::shared_ptr<Media> media);
+
+  static const std::string ClassName;
+
+  const std::string& kind() const override;
+
+  const std::shared_ptr<Media>& input() const;
+
+  void run() override;
+  void cancel() override;
+
+  void exportAsPython(const std::string& folder) const override;
+
+protected:
+  void processNextChapter();
+  void onProcessStateChanged();
+  void onProcessReadyReadStandardError();
+  void onProcessFinished(int exitCode);
+
+private:
+  size_t m_current_chapter = 0;
+  QProcess* m_process = nullptr;
+};
+
+inline const std::shared_ptr<Media>& SplitChapter::input() const
+{
+  return m_input;
+}
+
+#endif // FFMPEG_GUI_JOBS_SPLITCHAPTER_H
