@@ -7,16 +7,66 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+class QProcess;
 
 class Media;
 
 class FFMPEG
 {
 public:
+  FFMPEG();
+  explicit FFMPEG(const std::vector<std::string>& args);
+  ~FFMPEG();
+
+  enum ExitStatus
+  {
+    NORMAL_EXIT = 0,
+    CRASH_EXIT = 1,
+  };
+
+  bool isRunning() const;
+  bool isFinished() const;
+  void kill();
+  void waitForFinished();
+  ExitStatus exitStatus() const;
+  int exitCode() const;
+
+  double progress() const;
+
+  const std::string& output() const;
 
   static std::string version();
-
   static std::shared_ptr<Media> info(const std::string& path);
+
+  QProcess* qprocess() const;
+
+protected:
+  void update();
+
+private:
+  QProcess* m_process = nullptr;
+  double m_input_duration = 0.f;
+  double m_progress = 0.;
+  std::string m_output;
+  bool m_duration_parsed = false;
+  bool m_enconding_started = false;
 };
+
+inline double FFMPEG::progress() const
+{
+  return m_progress;
+}
+
+inline const std::string& FFMPEG::output() const
+{
+  return m_output;
+}
+
+inline QProcess* FFMPEG::qprocess() const
+{
+  return m_process;
+}
 
 #endif // FFMPEG_GUI_FFMPEG_H

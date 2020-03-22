@@ -77,6 +77,22 @@ static std::vector<std::string> split(const std::string& str, char sep)
   return ret;
 }
 
+inline static int conv_digit(char c)
+{
+  return c - '0';
+}
+
+static double parse_duration(const char* begin, const char* end)
+{
+  // format: "00:03:10.60"
+  int hours = conv_digit(begin[0]) * 10 + conv_digit(begin[1]);
+  int mins = conv_digit(begin[3]) * 10 + conv_digit(begin[4]);
+  int secs = conv_digit(begin[6]) * 10 + conv_digit(begin[7]);
+  int msecs = conv_digit(begin[9]) * 100 + conv_digit(begin[10]) * 10;
+
+  return hours * 3600 + mins * 60 + secs + (msecs / 1000.);
+}
+
 std::shared_ptr<Media> Parser::parseMediaInfo(std::string ffmpeg_output)
 {
   normalize(ffmpeg_output);
@@ -99,6 +115,32 @@ std::shared_ptr<Media> Parser::parseMediaInfo(std::string ffmpeg_output)
   parse_input();
 
   return m_result;
+}
+
+bool Parser::parseInputDuration(const std::string& line_output, double& duration)
+{
+  static const std::string prefix = "  Duration:";
+
+  if (!starts_with(line_output, prefix))
+    return false;
+
+  // format: "  Duration: 00:03:10.60"
+  duration = parse_duration(line_output.data() + 12, line_output.data() + 23);
+  return true;
+}
+
+bool Parser::parseProgressTime(const std::string& line_output, double& time)
+{
+  static const std::string prefix = "time=";
+
+  size_t pos = line_output.rfind(prefix);
+  
+  if (pos == std::string::npos || pos + 5 + 11 >= line_output.size())
+    return false;
+
+  // format: "time=00:03:10.60"
+  time = parse_duration(line_output.data() + pos + 5, line_output.data() + pos + 16);
+  return true;
 }
 
 int Parser::indent(const std::string& str)

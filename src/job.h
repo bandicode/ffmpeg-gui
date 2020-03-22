@@ -9,6 +9,8 @@
 
 #include <string>
 
+class FFMPEG;
+
 class Job : public QObject
 {
   Q_OBJECT
@@ -63,6 +65,10 @@ protected:
   void setProgress(int p);
   void setStatus(std::string mssg);
   void setResult(Result r);
+
+  virtual void update() = 0;
+
+  void timerEvent(QTimerEvent* ev) override;
 
 private:
   int m_num;

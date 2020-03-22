@@ -17,6 +17,8 @@ class Parser
 public:
 
   std::shared_ptr<Media> parseMediaInfo(std::string ffmpeg_output);
+  static bool parseInputDuration(const std::string& line_output, double& duration);
+  static bool parseProgressTime(const std::string& line_output, double& time);
 
 protected:
   static int indent(const std::string& str);

@@ -4,6 +4,8 @@
 
 #include "job.h"
 
+#include <QTimerEvent>
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -29,6 +31,11 @@ void Job::setState(State s)
   {
     m_state = s;
     Q_EMIT stateChanged();
+
+    if (m_state == State::RUNNING)
+    {
+      startTimer(50);
+    }
   }
 }
 
@@ -54,4 +61,18 @@ void Job::setResult(Result r)
 {
   m_result = r;
   setState(DONE);
+}
+
+void Job::timerEvent(QTimerEvent* ev)
+{
+  ev->accept();
+
+  if (state() != State::RUNNING)
+  {
+    killTimer(ev->timerId());
+  }
+  else
+  {
+    update();
+  }
 }

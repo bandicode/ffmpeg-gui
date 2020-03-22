@@ -4,6 +4,7 @@
 
 #include "jobs/splitchapter.h"
 
+#include "ffmpeg.h"
 #include "media.h"
 
 #include <QFileInfo>
@@ -18,6 +19,11 @@ SplitChapter::SplitChapter(int num, std::shared_ptr<Media> media)
   m_input(media)
 {
   setDescription("Split a video file based on its chapters.");
+}
+
+SplitChapter::~SplitChapter()
+{
+
 }
 
 const std::string& SplitChapter::kind() const
@@ -39,12 +45,14 @@ void SplitChapter::run()
 
 void SplitChapter::cancel()
 {
-  if (m_process)
+  if (m_ffmpeg)
   {
-    if (m_process->state() == QProcess::Running)
+    if (m_ffmpeg->isRunning())
     {
-      m_process->kill();
+      m_ffmpeg->kill();
     }
+
+    m_ffmpeg = nullptr;
   }
 
   setState(CANCELLED);
@@ -68,9 +76,6 @@ void SplitChapter::processNextChapter()
     return;
   }
 
-  m_process = new QProcess(this);
-  m_process->setProgram("ffmpeg");
-
   const Chapter& chap = m_input->chapters().at(m_current_chapter);
 
   const std::string start = std::to_string(chap.start());
@@ -78,45 +83,29 @@ void SplitChapter::processNextChapter()
 
   QFileInfo file{ QString::fromStdString(m_input->name()) };
 
-  QStringList args;
-  args << "-i" << QString::fromStdString(m_input->name())
-    << "-vcodec" << "copy"
-    << "-acodec" << "copy"
-    << "-ss" << QString::fromStdString(start)
-    << "-to" << QString::fromStdString(end)
-    << (file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix());
+  std::vector<std::string> args;
+  args.push_back("-i"); 
+  args.push_back(m_input->name());
+  args.push_back("-vcodec");
+  args.push_back("copy");
+  args.push_back("-acodec");
+  args.push_back("copy");
+  args.push_back("-ss");
+  args.push_back(start);
+  args.push_back("-to");
+  args.push_back(end);
+  args.push_back((file.baseName() + "-chap-" + QString::number(chap.num()) + "." + file.suffix()).toStdString());
 
-  qDebug() << args;
-
-  m_process->setArguments(args);
-
-  connect(m_process, &QProcess::stateChanged, this, &SplitChapter::onProcessStateChanged);
-  connect(m_process, &QProcess::readyReadStandardError, this, &SplitChapter::onProcessReadyReadStandardError);
-  connect(m_process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &SplitChapter::onProcessFinished);
-
-  m_process->setReadChannel(QProcess::StandardError);
-  m_process->start();
+  m_ffmpeg = std::make_unique<FFMPEG>(args);
 }
 
-void SplitChapter::onProcessStateChanged()
+void SplitChapter::update()
 {
-
-}
-
-void SplitChapter::onProcessReadyReadStandardError()
-{
-  while (m_process->canReadLine())
+  if (m_ffmpeg->isFinished())
   {
-    qDebug() << m_process->readLine();
+    m_current_chapter++;
+    setProgress((static_cast<int>(m_current_chapter) - 1) * 100 / static_cast<int>(m_input->chapters().size()));
+    m_ffmpeg = nullptr;
+    processNextChapter();
   }
-}
-
-void SplitChapter::onProcessFinished(int exitCode)
-{
-  m_current_chapter++;
-  setProgress((m_current_chapter - 1) * 100 / m_input->chapters().size());
-  m_process->deleteLater();
-  m_process = nullptr;
-
-  processNextChapter();
 }

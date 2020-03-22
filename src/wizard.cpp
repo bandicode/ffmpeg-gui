@@ -51,6 +51,7 @@ void JobRunnerWidget::onStateChanged()
   else if (m_job->state() == Job::DONE)
   {
     updateProgress(100);
+    disconnect(m_button, nullptr, this, nullptr);
     m_button->setText("Done!");
     connect(m_button, &QPushButton::clicked, this, &JobRunnerWidget::requestClose);
   }

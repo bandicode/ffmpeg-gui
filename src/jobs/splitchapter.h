@@ -19,6 +19,7 @@ private:
 public:
 
   SplitChapter(int num, std::shared_ptr<Media> media);
+  ~SplitChapter();
 
   static const std::string ClassName;
 
@@ -33,13 +34,12 @@ public:
 
 protected:
   void processNextChapter();
-  void onProcessStateChanged();
-  void onProcessReadyReadStandardError();
-  void onProcessFinished(int exitCode);
+
+  void update() override;
 
 private:
   size_t m_current_chapter = 0;
-  QProcess* m_process = nullptr;
+  std::unique_ptr<FFMPEG> m_ffmpeg;
 };
 
 inline const std::shared_ptr<Media>& SplitChapter::input() const
