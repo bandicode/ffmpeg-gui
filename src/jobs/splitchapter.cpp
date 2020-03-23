@@ -103,6 +103,8 @@ std::vector<std::string> SplitChapter::computeArgs(size_t chap_index) const
   std::vector<std::string> args;
   args.push_back("-i");
   args.push_back(m_input->name());
+  args.push_back("-map_chapters");
+  args.push_back("-1");
   args.push_back("-vcodec");
   args.push_back("copy");
   args.push_back("-acodec");
