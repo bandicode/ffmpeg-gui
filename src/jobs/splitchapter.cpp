@@ -15,9 +15,10 @@
 
 const std::string SplitChapter::ClassName = "SplitChapter";
 
-SplitChapter::SplitChapter(int num, std::shared_ptr<Media> media)
+SplitChapter::SplitChapter(int num, std::shared_ptr<Media> media, std::vector<size_t> which_chapters)
   : Job(num),
-  m_input(media)
+  m_input(media), 
+  m_chapters(std::move(which_chapters))
 {
   setDescription("Split a video file based on its chapters.");
 }
@@ -71,9 +72,9 @@ void SplitChapter::exportAsPython(const std::string& folder) const
   {
     script.def(script.fun(*this));
 
-    for (size_t i(0); i < m_input->chapters().size(); ++i)
+    for (size_t i(0); i < m_chapters.size(); ++i)
     {
-      std::vector<std::string> args = computeArgs(i);
+      std::vector<std::string> args = computeArgs(m_chapters.at(i));
 
       script.If(script.Not(script.osPathExists(script.str(args.back()))));
 
@@ -125,13 +126,13 @@ void SplitChapter::processNextChapter()
     return;
   }
 
-  if (m_current_chapter == m_input->chapters().size())
+  if (m_current_chapter == m_chapters.size())
   {
     setState(DONE);
     return;
   }
 
-  std::vector<std::string> args = computeArgs(m_current_chapter);
+  std::vector<std::string> args = computeArgs(m_chapters.at(m_current_chapter));
   remove(args.back());
 
   m_ffmpeg = std::make_unique<FFMPEG>(args);
@@ -142,7 +143,7 @@ void SplitChapter::update()
   if (m_ffmpeg->isFinished())
   {
     m_current_chapter++;
-    setProgress((static_cast<int>(m_current_chapter) - 1) * 100 / static_cast<int>(m_input->chapters().size()));
+    setProgress((static_cast<int>(m_current_chapter) - 1) * 100 / static_cast<int>(m_chapters.size()));
     m_ffmpeg = nullptr;
     processNextChapter();
   }

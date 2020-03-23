@@ -7,6 +7,8 @@
 
 #include "wizard.h"
 
+class ChapterSelectorWidget;
+
 class SplitChapterWizard : public Wizard
 {
   Q_OBJECT
@@ -21,6 +23,9 @@ public:
 
 protected:
   std::unique_ptr<Job> create() override;
+
+private:
+  ChapterSelectorWidget* m_chapter_selector_widget;
 };
 
 #endif // FFMPEG_GUI_WIZARDS_SPLITCHAPTER_H

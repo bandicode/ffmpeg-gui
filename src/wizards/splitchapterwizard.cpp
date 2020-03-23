@@ -8,6 +8,8 @@
 
 #include "jobs/splitchapter.h"
 
+#include "widgets/chapterselectorwidget.h"
+
 #include <QLabel>
 #include <QListWidget>
 
@@ -19,14 +21,8 @@ SplitChapterWizard::SplitChapterWizard(std::vector<std::shared_ptr<Media>> input
   contentWidget()->layout()->addWidget(new QLabel(
     "This wizard allow you to split a video file into its chapters."));
 
-  QListWidget* list_widget = new QListWidget();
-
-  for (const auto& chap : this->inputs().front()->chapters())
-  {
-    list_widget->addItem(QString::number(chap.num()) + " - " + QString::fromStdString(chap.title()));
-  }
-
-  contentWidget()->layout()->addWidget(list_widget);
+  m_chapter_selector_widget = new ChapterSelectorWidget(this->inputs().front(), this);
+  contentWidget()->layout()->addWidget(m_chapter_selector_widget);
 }
 
 
@@ -57,5 +53,5 @@ Wizard* SplitChapterWizard::build(std::vector<std::shared_ptr<Media>> inputs)
 
 std::unique_ptr<Job> SplitChapterWizard::create()
 {
-  return std::make_unique<SplitChapter>(nextJobNumber(), inputs().front());
+  return std::make_unique<SplitChapter>(nextJobNumber(), inputs().front(), m_chapter_selector_widget->selectedChapters());
 }
