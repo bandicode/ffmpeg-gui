@@ -7,8 +7,6 @@
 
 #include "job.h"
 
-class QProcess;
-
 class Media;
 class Stream;
 
@@ -16,6 +14,8 @@ class SplitChapter : public Job
 {
 private:
   std::shared_ptr<Media> m_input;
+  std::vector<size_t> m_chapters;
+  std::vector<std::shared_ptr<Stream>> m_streams;
 
 public:
 
@@ -41,8 +41,6 @@ protected:
   void update() override;
 
 private:
-  std::vector<size_t> m_chapters;
-  std::vector<std::shared_ptr<Stream>> m_streams;
   size_t m_current_chapter = 0;
   std::unique_ptr<FFMPEG> m_ffmpeg;
 };

@@ -69,12 +69,12 @@ void Job::setResult(Result r)
 bool Job::userRemove(const std::string& file_path)
 {
   // TODO: ask user if necessary
-  remove(file_path);
+  removeFile(file_path);
 
   return !QFileInfo::exists(QString::fromStdString(file_path));
 }
 
-void Job::remove(const std::string& file_path)
+void Job::removeFile(const std::string& file_path)
 {
   if (QFileInfo::exists(QString::fromStdString(file_path)))
   {

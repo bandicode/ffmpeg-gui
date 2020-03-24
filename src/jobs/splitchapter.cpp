@@ -12,7 +12,6 @@
 #include "pythonscript.h"
 
 #include <QFileInfo>
-#include <QProcess>
 
 #include <QDebug>
 
@@ -147,7 +146,7 @@ void SplitChapter::processNextChapter()
   }
 
   std::vector<std::string> args = computeArgs(m_chapters.at(m_current_chapter));
-  remove(args.back());
+  removeFile(args.back());
 
   m_ffmpeg = std::make_unique<FFMPEG>(args);
 }

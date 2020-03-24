@@ -7,11 +7,13 @@
 #include "controller.h"
 #include "window.h"
 
+#include "wizards/batchconvertwizard.h"
 #include "wizards/splitchapterwizard.h"
 
 WizardListWidget::WizardListWidget(QWidget* parent)
   : QListWidget(parent)
 {
+  m_prototypes.push_back(WizardPrototype::make<BatchConvertWizard>());
   m_prototypes.push_back(WizardPrototype::make<SplitChapterWizard>());
 
   connect(&Controller::instance(), &Controller::inputsChanged, this, &WizardListWidget::onInputsChanged);

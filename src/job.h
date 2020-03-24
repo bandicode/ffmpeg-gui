@@ -67,7 +67,7 @@ protected:
   void setResult(Result r);
 
   bool userRemove(const std::string& file_path);
-  void remove(const std::string& file_path);
+  void removeFile(const std::string& file_path);
 
   virtual void update() = 0;
 
