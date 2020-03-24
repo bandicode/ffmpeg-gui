@@ -9,6 +9,7 @@
 #include "jobs/splitchapter.h"
 
 #include "widgets/chapterselectorwidget.h"
+#include "widgets/streamselectorwidget.h"
 
 #include <QLabel>
 #include <QListWidget>
@@ -23,6 +24,9 @@ SplitChapterWizard::SplitChapterWizard(std::vector<std::shared_ptr<Media>> input
 
   m_chapter_selector_widget = new ChapterSelectorWidget(this->inputs().front(), this);
   contentWidget()->layout()->addWidget(m_chapter_selector_widget);
+
+  m_stream_selector_widget = new StreamSelectorWidget(this->inputs().front(), this);
+  contentWidget()->layout()->addWidget(m_stream_selector_widget);
 }
 
 
@@ -53,5 +57,5 @@ Wizard* SplitChapterWizard::build(std::vector<std::shared_ptr<Media>> inputs)
 
 std::unique_ptr<Job> SplitChapterWizard::create()
 {
-  return std::make_unique<SplitChapter>(nextJobNumber(), inputs().front(), m_chapter_selector_widget->selectedChapters());
+  return std::make_unique<SplitChapter>(nextJobNumber(), inputs().front(), m_chapter_selector_widget->selectedChapters(), m_stream_selector_widget->selectedStreams());
 }

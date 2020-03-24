@@ -10,6 +10,7 @@
 class QProcess;
 
 class Media;
+class Stream;
 
 class SplitChapter : public Job
 {
@@ -18,7 +19,7 @@ private:
 
 public:
 
-  SplitChapter(int num, std::shared_ptr<Media> media, std::vector<size_t> which_chapters);
+  SplitChapter(int num, std::shared_ptr<Media> media, std::vector<size_t> which_chapters, std::vector<std::shared_ptr<Stream>> which_streams);
   ~SplitChapter();
 
   static const std::string ClassName;
@@ -41,6 +42,7 @@ protected:
 
 private:
   std::vector<size_t> m_chapters;
+  std::vector<std::shared_ptr<Stream>> m_streams;
   size_t m_current_chapter = 0;
   std::unique_ptr<FFMPEG> m_ffmpeg;
 };

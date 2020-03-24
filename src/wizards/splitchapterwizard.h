@@ -8,6 +8,7 @@
 #include "wizard.h"
 
 class ChapterSelectorWidget;
+class StreamSelectorWidget;
 
 class SplitChapterWizard : public Wizard
 {
@@ -26,6 +27,7 @@ protected:
 
 private:
   ChapterSelectorWidget* m_chapter_selector_widget;
+  StreamSelectorWidget* m_stream_selector_widget;
 };
 
 #endif // FFMPEG_GUI_WIZARDS_SPLITCHAPTER_H

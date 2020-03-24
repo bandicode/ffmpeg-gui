@@ -5,7 +5,10 @@
 #include "jobs/splitchapter.h"
 
 #include "ffmpeg.h"
+
 #include "media.h"
+#include "media/stream.h"
+
 #include "pythonscript.h"
 
 #include <QFileInfo>
@@ -15,10 +18,11 @@
 
 const std::string SplitChapter::ClassName = "SplitChapter";
 
-SplitChapter::SplitChapter(int num, std::shared_ptr<Media> media, std::vector<size_t> which_chapters)
+SplitChapter::SplitChapter(int num, std::shared_ptr<Media> media, std::vector<size_t> which_chapters, std::vector<std::shared_ptr<Stream>> which_streams)
   : Job(num),
   m_input(media), 
-  m_chapters(std::move(which_chapters))
+  m_chapters(std::move(which_chapters)),
+  m_streams(std::move(which_streams))
 {
   setDescription("Split a video file based on its chapters.");
 }
@@ -106,6 +110,16 @@ std::vector<std::string> SplitChapter::computeArgs(size_t chap_index) const
   args.push_back(m_input->name());
   args.push_back("-map_chapters");
   args.push_back("-1");
+
+  if (!m_streams.empty())
+  {
+    for (const std::shared_ptr<Stream>& s : m_streams)
+    {
+      args.push_back("-map");
+      args.push_back("0:" + std::to_string(s->num()));
+    }
+  }
+
   args.push_back("-vcodec");
   args.push_back("copy");
   args.push_back("-acodec");

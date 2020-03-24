@@ -41,6 +41,20 @@ public:
   std::string metadata(const std::string& name) const;
 };
 
+inline std::string to_string(Stream::Kind k)
+{
+  switch (k)
+  {
+  case Stream::SUBTITLE:
+    return "subtitle";
+  case Stream::AUDIO:
+    return "audio";
+  case Stream::VIDEO:
+  default:
+    return "video";
+  }
+}
+
 inline int Stream::num() const
 {
   return m_num;
