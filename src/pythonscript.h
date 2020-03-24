@@ -57,6 +57,7 @@ public:
   const std::string& indent() const;
 
   void newline();
+  void importJob(const Job& job);
   void importSubprocess();
   void importOs();
   void importOsPath();

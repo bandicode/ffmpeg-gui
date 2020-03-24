@@ -34,6 +34,7 @@ public:
   void addJob(std::unique_ptr<Job> job);
   void removeJob(Job* job);
   void removeJob(size_t index);
+  void clearJobs();
 
 protected Q_SLOTS:
 

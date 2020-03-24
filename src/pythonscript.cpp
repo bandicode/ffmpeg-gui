@@ -72,6 +72,11 @@ void PythonScript::newline()
   m_fstream << "\n";
 }
 
+void PythonScript::importJob(const Job& job)
+{
+  m_fstream << indent() << "from job_" << job.num() << " import " << fun(job) << "\n";
+}
+
 void PythonScript::importSubprocess()
 {
   m_fstream << indent() << "import subprocess" << "\n";

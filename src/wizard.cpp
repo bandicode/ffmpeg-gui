@@ -95,7 +95,7 @@ Wizard::Wizard(std::vector<std::shared_ptr<Media>> inputs, QWidget* parent)
     m_buttons_layout->addStretch();
 
     m_run_button = new QPushButton("Run");
-    m_queue_button = new QPushButton("Cancel");
+    m_queue_button = new QPushButton("Queue");
 
     m_buttons_layout->addWidget(m_run_button);
     m_buttons_layout->addWidget(m_queue_button);

@@ -87,3 +87,9 @@ void Controller::removeJob(size_t index)
   m_jobs.erase(m_jobs.begin() + index);
   Q_EMIT jobsChanged();
 }
+
+void Controller::clearJobs()
+{
+  m_jobs.clear();
+  Q_EMIT jobsChanged();
+}
