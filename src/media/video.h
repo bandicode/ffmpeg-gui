@@ -9,35 +9,55 @@
 
 class Video : public Stream
 {
-  int m_width;
-  int m_height;
+  std::pair<int, int> m_size;
+  std::pair<int, int> m_sar;
+  std::pair<int, int> m_dar;
   double m_fps;
 
 public:
 
-  Video(int num, int w, int h, double fps);
+  Video(int num, std::pair<int, int> size, std::pair<int, int> sar, std::pair<int, int> dar, double fps);
 
   Kind kind() const override;
 
   int width() const;
   int height() const;
 
+  const std::pair<int, int>& size() const;
+  const std::pair<int, int>& sar() const;
+  const std::pair<int, int>& dar() const;
+
   double fps() const;
 };
 
 inline int Video::width() const
 {
-  return m_width;
+  return size().first;
 }
 
 inline int Video::height() const
 {
-  return m_height;
+  return size().second;
 }
 
 inline double Video::fps() const
 {
   return m_fps;
+}
+
+inline const std::pair<int, int>& Video::size() const
+{
+  return m_size;
+}
+
+inline const std::pair<int, int>& Video::sar() const
+{
+  return m_sar;
+}
+
+inline const std::pair<int, int>& Video::dar() const
+{
+  return m_dar;
 }
 
 #endif // FFMPEG_GUI_VIDEO_H

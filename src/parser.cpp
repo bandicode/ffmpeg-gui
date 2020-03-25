@@ -339,7 +339,7 @@ void Parser::parse_video_stream(int num, std::string lang)
   std::string data{ line.begin() + off, line.end() };
   trim(data);
 
-  std::regex regexp{ "(\\d+)x(\\d+)" };
+  std::regex regexp{ "(\\d+)x(\\d+) \\[SAR (\\d+):(\\d+) DAR (\\d+):(\\d+)\\]" };
 
   auto match_begin =
     std::sregex_iterator(data.begin(), data.end(), regexp);
@@ -349,8 +349,9 @@ void Parser::parse_video_stream(int num, std::string lang)
 
   std::smatch match = *match_begin;
 
-  int w = std::stoi(match[1]);
-  int h = std::stoi(match[2]);
+  std::pair<int, int> size{ std::stoi(match[1]), std::stoi(match[2]) };
+  std::pair<int, int> sar{ std::stoi(match[3]), std::stoi(match[4]) };
+  std::pair<int, int> dar{ std::stoi(match[5]), std::stoi(match[6]) };
 
   double fps = -1.;
 
@@ -366,7 +367,7 @@ void Parser::parse_video_stream(int num, std::string lang)
     }
   }
 
-  auto stream = std::make_shared<Video>(num, w, h, fps);
+  auto stream = std::make_shared<Video>(num, size, sar, dar, fps);
   stream->language() = std::move(lang);
   m_result->streams().push_back(stream);
 }

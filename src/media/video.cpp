@@ -4,10 +4,11 @@
 
 #include "media/video.h"
 
-Video::Video(int num, int w, int h, double fps)
+Video::Video(int num, std::pair<int, int> size, std::pair<int, int> sar, std::pair<int, int> dar, double fps)
   : Stream(num),
-  m_width(w),
-  m_height(h),
+  m_size(size),
+  m_sar(sar),
+  m_dar(dar),
   m_fps(fps)
 {
 
