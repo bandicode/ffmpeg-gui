@@ -5,6 +5,7 @@
 #include "media.h"
 
 #include "media/stream.h"
+#include "media/video.h"
 
 Media::Media(std::string name, std::string title)
   : m_name(std::move(name)),
@@ -16,4 +17,22 @@ Media::Media(std::string name, std::string title)
 Media::~Media()
 {
 
+}
+
+bool Media::hasVideo() const
+{
+  return video() != nullptr;
+}
+
+std::shared_ptr<Video> Media::video() const
+{
+  for (const auto& s : streams())
+  {
+    if (s->kind() == Stream::VIDEO)
+    {
+      return std::static_pointer_cast<Video>(s);
+    }
+  }
+
+  return nullptr;
 }

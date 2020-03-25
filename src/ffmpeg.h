@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+class QPixmap;
 class QProcess;
 
 class Media;
@@ -39,6 +40,7 @@ public:
 
   static std::string version();
   static std::shared_ptr<Media> info(const std::string& path);
+  static QPixmap snapshot(const Media& media, double time);
 
   QProcess* qprocess() const;
 

@@ -5,12 +5,17 @@
 #include "ffmpeg.h"
 
 #include "media.h"
+#include "media/video.h"
 
 #include "parser.h"
 
-#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QPixmap>
 #include <QProcess>
 #include <QRegularExpression>
+
+#include <QDebug>
 
 #include <stdexcept>
 
@@ -184,4 +189,32 @@ std::shared_ptr<Media> FFMPEG::info(const std::string& path)
 
   Parser parser;
   return parser.parseMediaInfo(ba.toStdString());
+}
+
+QPixmap FFMPEG::snapshot(const Media& media, double time)
+{
+  std::string output_path = QDir::tempPath().toStdString() + "/ffmpeg-gui-snap.jpg";
+  auto video = media.video();
+
+  int realwidth = video->width() * video->sar().first / video->sar().second;
+  int realheight = video->height();
+  std::string size = std::to_string(realwidth) + "x" + std::to_string(realheight);
+
+  std::vector<std::string> args;
+  args.push_back("-ss");
+  args.push_back(std::to_string(time));
+  args.push_back("-i");
+  args.push_back(media.name());
+  args.push_back("-s");
+  args.push_back(size);
+  args.push_back("-vframes");
+  args.push_back("1");
+  args.push_back(output_path);
+
+  FFMPEG ffmpeg{ args };
+  ffmpeg.waitForFinished();
+
+  QPixmap result{ QString::fromStdString(output_path) };
+  QFile::remove(QString::fromStdString(output_path)); 
+  return result;
 }

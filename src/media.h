@@ -12,6 +12,7 @@
 #include "media/chapter.h"
 
 class Stream;
+class Video;
 
 class Media
 {
@@ -39,6 +40,9 @@ public:
 
   std::vector<std::shared_ptr<Stream>>& streams();
   const std::vector<std::shared_ptr<Stream>>& streams() const;
+
+  bool hasVideo() const;
+  std::shared_ptr<Video> video() const;
 };
 
 inline const std::string& Media::name() const
