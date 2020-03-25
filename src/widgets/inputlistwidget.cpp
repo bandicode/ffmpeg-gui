@@ -15,6 +15,8 @@
 #include <QMimeData>
 #include <QUrl>
 
+#include <QCoreApplication>
+
 #include <QDebug>
 
 InputListWidget::InputListWidget(QWidget* parent)
@@ -37,9 +39,9 @@ void InputListWidget::onInputsChanged()
 
 void InputListWidget::dragEnterEvent(QDragEnterEvent* ev)
 {
-  if (ev->mimeData()->urls().size() != 1)
+  if (ev->mimeData()->urls().size() > 1)
   {
-    ev->ignore();
+    ev->accept();
     return;
   }
 
@@ -68,9 +70,20 @@ void InputListWidget::dragLeaveEvent(QDragLeaveEvent* ev)
 
 void InputListWidget::dropEvent(QDropEvent* ev)
 {
-  QUrl url = ev->mimeData()->urls().first();
-  QString path = url.toLocalFile();
-  auto info = FFMPEG::info(path.toStdString());
- 
-  Controller::instance().addInput(info);
+  for (const QUrl url : ev->mimeData()->urls())
+  {
+    try
+    {
+      QString path = url.toLocalFile();
+      auto info = FFMPEG::info(path.toStdString());
+
+      Controller::instance().addInput(info);
+
+      QCoreApplication::processEvents();
+    }
+    catch (...)
+    {
+      // TODO: display message box
+    }
+  }
 }
