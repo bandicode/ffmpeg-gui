@@ -236,8 +236,13 @@ void Parser::parse_input_metadata()
 
 void Parser::parse_input_duration()
 {
-  read_line();
-  // no-op
+  const std::string& line = read_line();
+  double duration;
+
+  if (parseInputDuration(line, duration))
+  {
+    m_result->duration() = duration;
+  }
 }
 
 void Parser::parse_chapter()

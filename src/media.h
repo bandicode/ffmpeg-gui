@@ -17,6 +17,7 @@ class Media
 {
 private:
   std::string m_name;
+  double m_duration = -1.;
   std::string m_title;
   std::vector<Chapter> m_chapters;
   std::vector<std::shared_ptr<Stream>> m_streams;
@@ -26,6 +27,9 @@ public:
   ~Media();
 
   const std::string& name() const;
+
+  double& duration();
+  double duration() const;
 
   std::string& title();
   const std::string& title() const;
@@ -50,6 +54,16 @@ inline std::string& Media::title()
 inline const std::string& Media::title() const
 {
   return m_title;
+}
+
+inline double& Media::duration()
+{
+  return m_duration;
+}
+
+inline double Media::duration() const
+{
+  return m_duration;
 }
 
 inline std::vector<Chapter>& Media::chapters()
