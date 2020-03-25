@@ -15,6 +15,7 @@ class Stream
 {
 private:
   int m_num;
+  std::string m_language;
   std::vector<StreamMetadata> m_metadata;
 
 public:
@@ -33,6 +34,9 @@ public:
   virtual Kind kind() const = 0;
 
   int num() const;
+
+  std::string& language();
+  const std::string& language() const;
 
   std::vector<StreamMetadata>& metadata();
   const std::vector<StreamMetadata>& metadata() const;
@@ -58,6 +62,16 @@ inline std::string to_string(Stream::Kind k)
 inline int Stream::num() const
 {
   return m_num;
+}
+
+inline std::string& Stream::language()
+{
+  return m_language;
+}
+
+inline const std::string& Stream::language() const
+{
+  return m_language;
 }
 
 inline std::vector<StreamMetadata>& Stream::metadata()

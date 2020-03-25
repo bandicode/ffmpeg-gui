@@ -282,6 +282,7 @@ void Parser::parse_chapter_metadata(Chapter& chap)
 void Parser::parse_stream()
 {
   const std::string& stream = peek_line();
+  bool has_language = true;
 
   std::regex regexp{ "Stream #0:(\\d+)\\(([^\\s]+)\\): ([^\\s]+):" };
 
@@ -289,23 +290,35 @@ void Parser::parse_stream()
     std::sregex_iterator(stream.begin(), stream.end(), regexp);
 
   if (std::distance(match_begin, std::sregex_iterator()) != 1)
-    throw std::runtime_error{ "Could not parse stream" };
+  {
+    has_language = false;
+
+    regexp = std::regex{ "Stream #0:(\\d+): ([^\\s]+):" };
+
+    match_begin =
+      std::sregex_iterator(stream.begin(), stream.end(), regexp);
+
+    if (std::distance(match_begin, std::sregex_iterator()) != 1)
+      throw std::runtime_error{ "Could not parse stream" };
+  }
 
   std::smatch match = *match_begin;
 
   int stream_num = std::stoi(match[1]);
+  const std::string kind = match[has_language ? 3 : 2];
+  std::string lang = has_language ? match[2] : std::string();
   
-  if (match[3] == "Video")
+  if (kind == "Video")
   {
-    parse_video_stream(stream_num);
+    parse_video_stream(stream_num, std::move(lang));
   }
-  else if (match[3] == "Audio")
+  else if (kind == "Audio")
   {
-    parse_audio_stream(stream_num);
+    parse_audio_stream(stream_num, std::move(lang));
   }
-  else if (match[3] == "Subtitle")
+  else if (kind == "Subtitle")
   {
-    parse_subtitle_stream(stream_num);
+    parse_subtitle_stream(stream_num, std::move(lang));
   }
   else
   {
@@ -318,7 +331,7 @@ void Parser::parse_stream()
   }
 }
 
-void Parser::parse_video_stream(int num)
+void Parser::parse_video_stream(int num, std::string lang)
 {
   const std::string& line = read_line();
 
@@ -354,10 +367,11 @@ void Parser::parse_video_stream(int num)
   }
 
   auto stream = std::make_shared<Video>(num, w, h, fps);
+  stream->language() = std::move(lang);
   m_result->streams().push_back(stream);
 }
 
-void Parser::parse_audio_stream(int num)
+void Parser::parse_audio_stream(int num, std::string lang)
 {
   const std::string& line = read_line();
 
@@ -380,13 +394,15 @@ void Parser::parse_audio_stream(int num)
   }
 
   auto stream = std::make_shared<Audio>(num, samplerate);
+  stream->language() = std::move(lang);
   m_result->streams().push_back(stream);
 }
 
-void Parser::parse_subtitle_stream(int num)
+void Parser::parse_subtitle_stream(int num, std::string lang)
 {
   const std::string& line = read_line();
   auto stream = std::make_shared<Subtitle>(num);
+  stream->language() = std::move(lang);
   m_result->streams().push_back(stream);
 }
 

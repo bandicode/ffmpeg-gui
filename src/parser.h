@@ -33,9 +33,9 @@ protected:
   void parse_chapter();
   void parse_chapter_metadata(Chapter& chap);
   void parse_stream();
-  void parse_video_stream(int num);
-  void parse_audio_stream(int num);
-  void parse_subtitle_stream(int num);
+  void parse_video_stream(int num, std::string lang);
+  void parse_audio_stream(int num, std::string lang);
+  void parse_subtitle_stream(int num, std::string lang);
   void skip_unknown_stream();
   void parse_stream_metadata();
 
