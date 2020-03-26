@@ -12,6 +12,8 @@
 class QPixmap;
 class QProcess;
 
+struct Crop;
+
 class Media;
 
 class FFMPEG
@@ -40,6 +42,7 @@ public:
 
   static std::string version();
   static std::shared_ptr<Media> info(const std::string& path);
+  static Crop cropdetect(const Media& media, int nbsamples = 10);
   static QPixmap snapshot(const Media& media, double time);
 
   QProcess* qprocess() const;

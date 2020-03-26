@@ -10,6 +10,7 @@
 #include "media/audio.h"
 #include "media/subtitle.h"
 #include "media/video.h"
+#include "media/crop.h"
 
 #include <QDebug>
 
@@ -141,6 +142,22 @@ bool Parser::parseProgressTime(const std::string& line_output, double& time)
   // format: "time=00:03:10.60"
   time = parse_duration(line_output.data() + pos + 5, line_output.data() + pos + 16);
   return true;
+}
+
+Crop Parser::parseCrop(const std::string& str)
+{
+  std::regex regexp{ "(\\d+):(\\d+):(\\d+):(\\d+)" };
+
+  auto match_begin =
+    std::sregex_iterator(str.begin(), str.end(), regexp);
+  auto match_end = std::sregex_iterator();
+
+  if (std::distance(match_begin, match_end) != 1)
+    throw std::runtime_error{ "Could not parse crop" };
+
+  std::smatch m = *match_begin;
+
+  return Crop{ std::stoi(m[1]), std::stoi(m[2]), std::stoi(m[3]), std::stoi(m[4]) };
 }
 
 int Parser::indent(const std::string& str)

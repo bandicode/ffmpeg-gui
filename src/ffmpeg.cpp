@@ -6,6 +6,7 @@
 
 #include "media.h"
 #include "media/video.h"
+#include "media/crop.h"
 
 #include "parser.h"
 
@@ -17,6 +18,7 @@
 
 #include <QDebug>
 
+#include <cassert>
 #include <stdexcept>
 
 FFMPEG::FFMPEG()
@@ -77,7 +79,7 @@ void FFMPEG::kill()
 
 void FFMPEG::waitForFinished()
 {
-  if(m_process->state() == QProcess::Running)
+  if (m_process->state() == QProcess::Running)
     m_process->waitForFinished(-1);
 }
 
@@ -128,32 +130,36 @@ void FFMPEG::update()
   }
   else
   {
-    std::string text = m_process->readAll().constData();
-
-    double time = 0.;
-    
-    if (m_input_duration > 0. && Parser::parseProgressTime(text, time))
+    while (m_process->canReadLine())
     {
-      m_progress = time / m_input_duration;
+      std::string line = m_process->readLine().constData();
+      if (line.back() == '\r')
+        line.pop_back();
+
+      double time = 0.;
+      const bool parse_progress = Parser::parseProgressTime(line, time);
+
+      if (m_input_duration > 0. && parse_progress)
+        m_progress = time / m_input_duration;
+
+      if (!parse_progress)
+        m_output += line;
     }
 
-    size_t newline = text.rfind('\n', text.size() - 2);
-
-    if (newline != std::string::npos)
     {
-      text = std::string(text.begin() + newline + 1, text.end());
+      std::string text = m_process->readAll().constData();
 
-      if (text.size() > 2 && text.at(text.size() - 2) == '\r')
-      {
-        text.pop_back();
-        text.pop_back();
-        text.push_back('\n');
-      }
-    }
+      if (text.empty())
+        return;
 
-    if (starts_with_video(text))
-    {
-      m_output += text;
+      double time = 0.;
+      const bool parse_progress = Parser::parseProgressTime(text, time);
+
+      if (m_input_duration > 0. && parse_progress)
+        m_progress = time / m_input_duration;
+
+      if (!parse_progress)
+        m_output += text;
     }
   }
 }
@@ -189,6 +195,66 @@ std::shared_ptr<Media> FFMPEG::info(const std::string& path)
 
   Parser parser;
   return parser.parseMediaInfo(ba.toStdString());
+}
+
+Crop FFMPEG::cropdetect(const Media& media, int nbsamples)
+{
+  assert(media.hasVideo());
+
+  const Crop unknown_crop{ 0, 0, std::numeric_limits<int>::max(), std::numeric_limits<int>::max() };
+  Crop result = unknown_crop;
+
+  const double interval = media.duration() / (nbsamples + 1);
+
+  for (int i(0); i < nbsamples; ++i)
+  {
+    const double t = (i + 1) * interval;
+
+    std::vector<std::string> args;
+    args.push_back("-ss");
+    args.push_back(std::to_string(t));
+    args.push_back("-i");
+    args.push_back(media.name());
+    args.push_back("-t");
+    args.push_back("1");
+    args.push_back("-vf");
+    args.push_back("cropdetect");
+    args.push_back("-f");
+    args.push_back("null");
+    args.push_back("-");
+
+    FFMPEG ffmpeg{ args };
+    ffmpeg.waitForFinished();
+
+    size_t pos = ffmpeg.output().find("crop=");
+
+    if (pos == std::string::npos)
+    {
+      qDebug() << "Could not parse crop";
+      continue;
+    }
+
+    size_t crop_end = ffmpeg.output().find('\n', pos);
+
+    try
+    {
+      Crop crop = Parser::parseCrop(ffmpeg.output().substr(pos + 5, crop_end - pos - 5));
+
+      result.width = std::max(crop.width, result.width);
+      result.height = std::max(crop.height, result.height);
+      result.x = std::min(crop.x, result.x);
+      result.y = std::min(crop.y, result.y);
+    }
+    catch (const std::runtime_error&)
+    {
+
+    }
+  }
+
+  if(result == unknown_crop)
+    throw std::runtime_error{ "Could not detect crop" };
+
+  return result;
 }
 
 QPixmap FFMPEG::snapshot(const Media& media, double time)
