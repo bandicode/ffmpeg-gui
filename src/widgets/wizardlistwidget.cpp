@@ -9,11 +9,13 @@
 
 #include "wizards/batchconvertwizard.h"
 #include "wizards/concatwizard.h"
+#include "wizards/convertwizard.h"
 #include "wizards/splitchapterwizard.h"
 
 WizardListWidget::WizardListWidget(QWidget* parent)
   : QListWidget(parent)
 {
+  m_prototypes.push_back(WizardPrototype::make<ConvertWizard>());
   m_prototypes.push_back(WizardPrototype::make<BatchConvertWizard>());
   m_prototypes.push_back(WizardPrototype::make<ConcatWizard>());
   m_prototypes.push_back(WizardPrototype::make<SplitChapterWizard>());
