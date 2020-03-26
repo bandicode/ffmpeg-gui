@@ -23,6 +23,10 @@ set(CMAKE_AUTORCC TRUE)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
+IF (WIN32)
+  file(WRITE "${CMAKE_BINARY_DIR}/dllinfo.txt" "${Qt5_DIR}")
+ENDIF()
+
 ##################################################################
 ####### ffmpeg-gui
 ##################################################################
@@ -42,6 +46,11 @@ add_executable(ffmpeg-gui ${FFMPEG_GUI_HDR_FILES} ${FFMPEG_GUI_SRC_FILES} ${FFMP
 target_include_directories(ffmpeg-gui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(ffmpeg-gui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(ffmpeg-gui Qt5::Core Qt5::Gui Qt5::Widgets)
+
+IF (WIN32)
+  #set_property(TARGET ffmpeg-gui PROPERTY WIN32_EXECUTABLE true)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+ENDIF()
 
 foreach(_source IN ITEMS ${FFMPEG_GUI_HDR_FILES} ${FFMPEG_GUI_SRC_FILES})
     get_filename_component(_source_path "${_source}" PATH)
