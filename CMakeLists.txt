@@ -27,12 +27,18 @@ find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 ####### ffmpeg-gui
 ##################################################################
 
+set(FFMPEG_GUI_RESOURCES "src/res.qrc")
+
+IF (WIN32)
+  set(FFMPEG_GUI_RESOURCES "src/windows_res.rc" ${FFMPEG_GUI_RESOURCES})
+ENDIF()
+
 file(GLOB_RECURSE FFMPEG_GUI_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE FFMPEG_GUI_HDR_FILES 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
-add_executable(ffmpeg-gui ${FFMPEG_GUI_HDR_FILES} ${FFMPEG_GUI_SRC_FILES} "src/res.qrc")
+add_executable(ffmpeg-gui ${FFMPEG_GUI_HDR_FILES} ${FFMPEG_GUI_SRC_FILES} ${FFMPEG_GUI_RESOURCES})
 target_include_directories(ffmpeg-gui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(ffmpeg-gui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(ffmpeg-gui Qt5::Core Qt5::Gui Qt5::Widgets)
