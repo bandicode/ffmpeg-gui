@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>ffmpeg GUI</Name>
+    <Version>0.0.0-dev</Version>
+    <Title>ffmpeg GUI</Title>
+    <Publisher>Vincent Chambrin</Publisher>
+    <StartMenuDir>ffmpeg GUI</StartMenuDir>
+    <TargetDir>@HomeDir@/ffmpeg-gui</TargetDir>
+</Installer>

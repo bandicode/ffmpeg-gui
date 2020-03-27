@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>ffmpeg-gui</DisplayName>
+    <Description>Install the ffmpeg GUI application.</Description>
+    <Version>0.0.0-dev</Version>
+    <ReleaseDate>2020-03-27</ReleaseDate>
+    <Default>script</Default>
+    <Script>installscript.qs</Script>
+</Package>

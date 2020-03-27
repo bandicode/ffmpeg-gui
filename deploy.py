@@ -17,6 +17,28 @@ def getQtDir():
 def ship(file):
   print("Copying", file)
   shutil.copy(file, "release")
+  
+def createInstaller():
+  print("Starting installer creation")
+  
+  binary_creator = shutil.which("binarycreator")
+  
+  if binary_creator is None:
+    qt_if_path = os.environ.get("QT_IF_DIR")
+    if qt_if_path is None:
+      print("Could not find binarycreator, skipping installer creation")
+      return None
+    binary_creator = qt_if_path + "/bin/binarycreator.exe"
+  
+  if os.path.exists(buildDir() + "/installer"):
+    shutil.rmtree(buildDir() + "/installer")
+  
+  shutil.copytree("installer", buildDir() + "/installer")
+  shutil.copytree("release", buildDir() + "/installer/packages/github.bandicode.ffmpeggui/data")
+  
+  subprocess.run([binary_creator, "--offline-only", "-c", "config/config.xml", "-p", "packages", "installer.exe"], cwd=buildDir() + "/installer")
+  shutil.move(buildDir() + "/installer/installer.exe", buildDir() + "/installer.exe")
+  
 
 def main():
   subprocess.run(["cmake", "--build", buildDir(), "--target", "ffmpeg-gui", "--config", "Release"])
@@ -34,5 +56,7 @@ def main():
   for lib in QT_DLL:
     ship(qt_path + "/bin/Qt5" + lib + ".dll")
 	
+  createInstaller()
+  
 if __name__ == "__main__":
   main()
