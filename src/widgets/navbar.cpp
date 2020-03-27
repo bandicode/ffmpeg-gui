@@ -17,6 +17,8 @@
 #include <QPen>
 #include <QPaintEvent>
 
+#include <QPushButton>
+
 #include <QHBoxLayout>
 
 #include <QDebug>
@@ -35,18 +37,43 @@ NavbarWidget::NavbarWidget(Window& window)
   connect(&window, &Window::closed, this, &NavbarWidget::onPageClosed);
 
   auto* layout = new QHBoxLayout;
+  layout->setContentsMargins(0, 0, 6, 0);
   layout->addStretch();
   setLayout(layout);
+
+  m_home_button = new QPushButton;
+  m_home_button->setIcon(QIcon(":/assets/home.svg"));
+  m_home_button->setFlat(true);
+  m_home_button->setFixedSize(16, 16);
+  layout->addWidget(m_home_button);
+
+  connect(m_home_button, &QPushButton::clicked, this, &NavbarWidget::onHomeButtonClicked);
 }
 
 void NavbarWidget::onPageOpened()
 {
   recomputeNavbarSize();
+
+  m_home_button->setVisible(Window::instance().pages().size() > 1);
 }
 
 void NavbarWidget::onPageClosed()
 {
   recomputeNavbarSize();
+
+  m_home_button->setVisible(Window::instance().pages().size() > 1);
+}
+
+void NavbarWidget::onHomeButtonClicked()
+{
+  Window& w = Window::instance();
+
+  while (w.pages().size() > 1)
+  {
+    w.closePage();
+  }
+
+  update();
 }
 
 QSize NavbarWidget::sizeHint() const

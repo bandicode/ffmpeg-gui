@@ -7,6 +7,8 @@
 
 #include <QWidget>
 
+class QPushButton;
+
 class Window;
 
 class NavbarWidget : public QWidget
@@ -18,6 +20,7 @@ public:
 protected Q_SLOTS:
   void onPageOpened();
   void onPageClosed();
+  void onHomeButtonClicked();
 
 protected:
   QSize sizeHint() const override;
@@ -29,6 +32,7 @@ private:
 
 private:
   QSize m_navbar_size;
+  QPushButton* m_home_button;
 };
 
 #endif // FFMPEG_GUI_WIDGETS_NAVBAR_H
