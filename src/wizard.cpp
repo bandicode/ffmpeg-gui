@@ -81,8 +81,9 @@ void JobRunnerWidget::requestClose()
   Q_EMIT closeRequested();
 }
 
-Wizard::Wizard(std::vector<std::shared_ptr<Media>> inputs, QWidget* parent)
+Wizard::Wizard(QString title, std::vector<std::shared_ptr<Media>> inputs, QWidget* parent)
   : Page(parent),
+  m_title(title),
   m_inputs(std::move(inputs))
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -112,6 +113,11 @@ Wizard::Wizard(std::vector<std::shared_ptr<Media>> inputs, QWidget* parent)
 Wizard::~Wizard()
 {
 
+}
+
+QString Wizard::title() const
+{
+  return m_title;
 }
 
 void Wizard::createAndRun()

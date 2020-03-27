@@ -10,6 +10,8 @@
 
 #include "pages/mainpage.h"
 
+#include "widgets/navbar.h"
+
 #include <QIcon>
 
 #include <QHBoxLayout>
@@ -28,10 +30,14 @@ Window::Window(Controller& c)
 
   setWindowTitle("ffmpeg GUI - " + QString::fromStdString(ver));
   setWindowIcon(QIcon(":/logo.svg"));
-
+  
   QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->addWidget(new NavbarWidget(*this));
   m_pages.push_back(new MainPage());
   layout->addWidget(m_pages.back());
+
+  Q_EMIT opened(m_pages.back());
 }
 
 Window::~Window()
@@ -51,12 +57,18 @@ void Window::open(Page* page)
   layout()->itemAt(layout()->count() - 1)->widget()->hide();
   layout()->addWidget(page);
   m_pages.push_back(page);
+
+  Q_EMIT opened(page);
 }
 
 void Window::closePage()
 {
-  layout()->removeWidget(layout()->itemAt(layout()->count() - 1)->widget());
-  m_pages.back()->deleteLater();
+  Page* p = m_pages.back();
   m_pages.pop_back();
+
+  layout()->removeWidget(layout()->itemAt(layout()->count() - 1)->widget());
+  p->deleteLater();
   layout()->itemAt(layout()->count() - 1)->widget()->show();
+
+  Q_EMIT closed(p);
 }

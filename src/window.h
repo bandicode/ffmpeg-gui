@@ -26,6 +26,12 @@ public:
   void open(Page* page);
   void closePage();
 
+  const std::vector<Page*>& pages() const;
+
+Q_SIGNALS:
+  void opened(Page* page);
+  void closed(Page* page);
+
 protected:
 
 protected Q_SLOTS:
@@ -41,6 +47,11 @@ private:
 inline Controller& Window::controller() const
 {
   return m_controller;
+}
+
+inline const std::vector<Page*>& Window::pages() const
+{
+  return m_pages;
 }
 
 #endif // FFMPEG_GUI_WINDOW_H

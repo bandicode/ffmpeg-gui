@@ -50,6 +50,11 @@ MainPage::~MainPage()
 
 }
 
+QString MainPage::title() const
+{
+  return "Home";
+}
+
 void MainPage::onUrlClicked(const QString& url)
 {
   if (url.startsWith("https"))

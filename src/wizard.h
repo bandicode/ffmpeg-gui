@@ -47,8 +47,10 @@ class Wizard : public Page
 {
   Q_OBJECT
 public:
-  explicit Wizard(std::vector<std::shared_ptr<Media>> inputs, QWidget* parent = nullptr);
+  Wizard(QString title, std::vector<std::shared_ptr<Media>> inputs, QWidget* parent = nullptr);
   ~Wizard();
+
+  QString title() const override;
 
   const std::vector<std::shared_ptr<Media>>& inputs() const;
 
@@ -67,6 +69,7 @@ protected:
   void setCreationButtonsEnabled(bool on = true);
 
 private:
+  QString m_title;
   std::vector<std::shared_ptr<Media>> m_inputs;
   QWidget* m_content;
   QHBoxLayout* m_buttons_layout;

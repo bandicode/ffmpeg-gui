@@ -14,6 +14,8 @@ public:
   explicit Page(QWidget* parent = nullptr);
   ~Page();
 
+  virtual QString title() const = 0;
+
 protected:
   void closePage();
   void close(); // hides QWidget::close()

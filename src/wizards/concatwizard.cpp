@@ -11,7 +11,7 @@
 #include <QLabel>
 
 ConcatWizard::ConcatWizard(std::vector<std::shared_ptr<Media>> inputs, QWidget* parent)
-  : Wizard(std::move(inputs), parent)
+  : Wizard(QString::fromStdString(title()), std::move(inputs), parent)
 {
   contentWidget()->setLayout(new QVBoxLayout());
   contentWidget()->layout()->addWidget(new QLabel(

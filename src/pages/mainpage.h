@@ -18,6 +18,8 @@ public:
   explicit MainPage(QWidget* parent = nullptr);
   ~MainPage();
 
+  QString title() const override;
+
 protected Q_SLOTS:
   void onUrlClicked(const QString& url);
   void onInputsChanged();
