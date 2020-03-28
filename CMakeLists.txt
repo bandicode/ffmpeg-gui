@@ -21,7 +21,7 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC TRUE)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Svg REQUIRED)
 
 IF (WIN32)
   file(WRITE "${CMAKE_BINARY_DIR}/dllinfo.txt" "${Qt5_DIR}")

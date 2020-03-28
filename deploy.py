@@ -1,10 +1,12 @@
 
+import glob
 import os
 import shutil
 import subprocess
 
 BUILD_DIR = "build"
-QT_DLL = ["Core", "Gui", "Widgets"]
+QT_DLL = ["Core", "Gui", "Widgets", "Svg"]
+QT_PLUGINS = ["platforms"]
 
 def buildDir():
   return BUILD_DIR
@@ -16,7 +18,10 @@ def getQtDir():
 
 def ship(file):
   print("Copying", file)
-  shutil.copy(file, "release")
+  if os.path.isdir(file):
+    shutil.copytree(file, "release/" + os.path.basename(file))
+  else:
+    shutil.copy(file, "release")
   
 def createInstaller():
   print("Starting installer creation")
@@ -55,6 +60,16 @@ def main():
 
   for lib in QT_DLL:
     ship(qt_path + "/bin/Qt5" + lib + ".dll")
+
+  for p in QT_PLUGINS:
+    ship(qt_path + "/plugins/" + p)
+
+  for f in glob.glob("release/**/*.pdb"):
+    print("Removing", f)
+    os.remove(f)
+  for f in glob.glob("release/**/*d.dll"):
+    print("Removing", f)
+    os.remove(f)
 	
   createInstaller()
   
